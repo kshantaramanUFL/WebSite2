@@ -1,0 +1,6 @@
+digraph G{
+edge[color=red];
+worker_2->worker_1[label="4"];
+edge[color=red];
+worker_9->worker_8[label="1"];
+}

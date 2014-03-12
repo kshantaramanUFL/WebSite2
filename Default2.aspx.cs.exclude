@@ -1,0 +1,87 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.IO;
+
+public partial class Default2 : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            TreeNode onjParent = new TreeNode("D:\\", "D:\\");
+            onjParent.PopulateOnDemand = true;
+            TreeView1.Nodes.Add(onjParent);
+
+            TreeView1.CollapseAll();
+        }
+        TreeView1.TreeNodeExpanded += new TreeNodeEventHandler(TreeView1_TreeNodeExpanded);
+        TreeView1.SelectedNodeChanged += new EventHandler(TreeView1_SelectedNodeChanged);
+    }
+    void TreeView1_SelectedNodeChanged(object sender, EventArgs e)
+    {
+        BrowseTextBox.Text = TreeView1.SelectedValue;
+    }
+    void TreeView1_TreeNodeExpanded(object sender, TreeNodeEventArgs e)
+    {
+        if (e.Node.Value.EndsWith("\\"))
+        {
+            AddNodes(e.Node.Value, e.Node);
+        }
+    }
+    private TreeNode AddNodes(string path, TreeNode parentNode)
+    {
+        //FileList objList = new FileList(path, "*.*");
+        
+        TreeNode node = new TreeNode(path, path);
+        for (int index = 0; index < objList.Directories.Length; index++)
+        {
+            string directory = objList.Directories[index];
+            TreeNode objChildNode = new TreeNode(directory, path + "\\" + directory + "\\");
+            objChildNode.PopulateOnDemand = true;
+            objChildNode.Target = "_blank";
+
+            parentNode.ChildNodes.Add(objChildNode);
+        }
+        foreach (string file in objList.Files)
+        {
+            TreeNode objChildNode = new TreeNode(file, path + "\\" + file);
+            parentNode.ChildNodes.Add(objChildNode);
+        }
+        return node;
+    }
+    protected void BrowseButton_Click(object sender, EventArgs e)
+    {
+        TreeView1.Nodes.Clear();
+        if (UpdateBrowseTextBoxWithSlash())
+        {
+            TreeNode onjParent = new TreeNode(BrowseTextBox.Text, BrowseTextBox.Text);
+            onjParent.PopulateOnDemand = true;
+            TreeView1.Nodes.Add(onjParent);
+
+            TreeView1.CollapseAll();
+        }
+    }
+    private bool UpdateBrowseTextBoxWithSlash()
+    {
+        if (BrowseTextBox.Text.Length != 0)
+        {
+            if (
+                    -1 == BrowseTextBox.Text.LastIndexOf(".") &&
+                    !BrowseTextBox.Text.Substring(BrowseTextBox.Text.Length - 1, 1).Equals("/") &&
+                    !BrowseTextBox.Text.Substring(BrowseTextBox.Text.Length - 1, 1).Equals("\\")
+                )
+            {
+                if (BrowseTextBox.Text.Substring(0, 1).Equals("\\") || -1 != BrowseTextBox.Text.IndexOf(":\\"))
+                    BrowseTextBox.Text += "\\";
+                else
+                    BrowseTextBox.Text += "/";
+                return System.IO.Directory.Exists(BrowseTextBox.Text);
+            }
+        }
+        return true;
+    }
+}
